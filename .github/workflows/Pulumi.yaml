@@ -1,3 +1,0 @@
-name: realtime-innovations-project-7
-runtime: nodejs
-description: GCP app with rate-limiting and Pub/Sub

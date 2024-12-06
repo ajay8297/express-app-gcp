@@ -1,4 +1,0 @@
-config:
-  gcp:project: "final-project-443911"
-  gcp:region: "us-central1"
-  redis:instance_ip: "10.140.131.139" # Leave empty for local Redis
