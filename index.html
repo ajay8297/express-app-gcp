@@ -1,65 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Realtime-Innovations Project 7</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 20px;
-    }
-
-    button {
-      font-size: 16px;
-      padding: 10px 20px;
-      margin: 10px;
-      border: none;
-      color: white;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-
-    #blueButton {
-      background-color: blue;
-    }
-
-    #redButton {
-      background-color: red;
-    }
-
-    #message {
-      margin-top: 20px;
-      font-size: 18px;
-      color: darkred;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Click</title>
 </head>
 <body>
-  <h1>Realtime-Innovations Project 7</h1>
-  <button id="blueButton" onclick="handleClick('blue')">Blue Button</button>
-  <button id="redButton" onclick="handleClick('red')">Red Button</button>
-  <div id="message"></div>
+    <h1>Button Click Tracker</h1>
+    <form id="clickForm">
+        <label for="button">Button:</label>
+        <input type="text" id="button" name="button" required>
+        <br>
+        <label for="ip">IP Address:</label>
+        <input type="text" id="ip" name="ip" required>
+        <br>
+        <button type="submit">Submit</button>
+    </form>
 
-  <script>
-    async function handleClick(button) {
-      const ip = "127.0.0.1"; // Replace with a real IP fetching method
-      const response = await fetch('/click', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ button, ip })
-      });
+    <script>
+        document.getElementById('clickForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const button = document.getElementById('button').value;
+            const ip = document.getElementById('ip').value;
 
-      const messageElement = document.getElementById("message");
-      if (response.status === 429) {
-        messageElement.textContent = `Rate limit exceeded for ${button} button!`;
-      } else if (response.ok) {
-        messageElement.textContent = `${button.charAt(0).toUpperCase() + button.slice(1)} button clicked successfully.`;
-      } else {
-        messageElement.textContent = `An error occurred. Please try again later.`;
-      }
-    }
-  </script>
+            const response = await fetch('/click', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ button, ip })
+            });
+
+            if (response.status === 429) {
+                alert('Rate limit exceeded');
+            } else if (response.ok) {
+                alert('Button clicked successfully!');
+            } else {
+                alert('An error occurred');
+            }
+        });
+    </script>
 </body>
 </html>
