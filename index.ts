@@ -1,41 +1,46 @@
-import * as gcp from "@pulumi/gcp";
 import * as pulumi from "@pulumi/pulumi";
+import * as gcp from "@pulumi/gcp";
 
-// Create a Pub/Sub Topic
-const pubsubTopic = new gcp.pubsub.Topic("rate-limit-topic");
+// Define the GCP project and region
+const config = new pulumi.Config();
+const project = config.require("gcp:project");
+const region = config.require("gcp:region");
+
+// Create a GCP container registry
+const imageName = "button-click-tracker";
+const image = new gcp.container.Registry(imageName, {});
+
+// Build and push the Docker image
+const imageUri = pulumi.interpolate`gcr.io/${project}/${imageName}`;
+const dockerBuild = new gcp.cloudbuild.Trigger("dockerBuild", {
+    filename: "cloudbuild.yaml",
+    substitutions: {
+        _IMAGE: imageUri,
+    },
+});
 
 // Create a Cloud Run service
-const cloudRunService = new gcp.cloudrun.Service("express-service", {
-    location: "us-central1",
+const service = new gcp.cloudrun.Service("button-click-tracker-service", {
+    location: region,
     template: {
         spec: {
-            containers: [
-                {
-                    image: "gcr.io/final-project-443911/express-gcp-app",
-                    ports: [{ containerPort: 8081 }], // Change the port to 8081 to avoid conflicts
-                    envs: [
-                        { name: "PUBSUB_TOPIC", value: pubsubTopic.name },
-                    ],
-                },
-            ],
+            containers: [{
+                image: imageUri,
+                envs: [
+                    { name: "FIREBASE_CONFIG", value: '{"projectId":"your-project-id","databaseURL":"https://your-project-id.firebaseio.com"}' },
+                ],
+            }],
         },
     },
 });
 
-// Allow unauthenticated access to Cloud Run
-new gcp.cloudrun.IamMember("unauthenticated-access", {
-    service: cloudRunService.name,
-    location: cloudRunService.location,
+// Allow unauthenticated access
+const iam = new gcp.cloudrun.IamMember("button-click-tracker-iam", {
+    service: service.name,
+    location: service.location,
     role: "roles/run.invoker",
     member: "allUsers",
 });
 
-// Create IAM Role for Cloud Run to Publish to Pub/Sub
-const cloudRunPubSubPolicy = new gcp.pubsub.TopicIAMBinding("cloud-run-pubsub", {
-    topic: pubsubTopic.name,
-    role: "roles/pubsub.publisher",
-    members: [pulumi.interpolate`serviceAccount:${cloudRunService.spec.template.spec.containers[0].name}@${gcp.config.project}.iam.gserviceaccount.com`],
-});
-
-// Export the Cloud Run Service URL
-export const url = cloudRunService.status.url;
+// Export the URL of the service
+export const url = service.statuses[0].url;
