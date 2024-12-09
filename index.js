@@ -9,7 +9,7 @@ const port = process.env.PORT || 8080;
 
 admin.initializeApp({
   credential: admin.credential.applicationDefault(),
-  databaseURL: 'https://your-project-id.firebaseio.com'
+  databaseURL: 'https://realtime-ajay-446536.firebaseio.com'
 });
 const db = admin.firestore();
 
