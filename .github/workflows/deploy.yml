@@ -3,7 +3,7 @@ name: Deploy to Cloud Run
 on:
   push:
     branches:
-      - main
+      - mai
 
 jobs:
   build-and-deploy:
@@ -16,23 +16,23 @@ jobs:
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v1
       with:
-        project_id: realtime-project5
+        project_id: realtime-project-453725
         service_account_key: ${{ secrets.GCP_SA_KEY }}
 
     - name: Configure Docker
       run: gcloud auth configure-docker
 
     - name: Build Docker image
-      run: docker build -t gcr.io/realtime-project5/button-click-tracker .
+      run: docker build -t gcr.io/realtime-project-453725/button-click-tracker .
 
     - name: Push Docker image
-      run: docker push gcr.io/realtime-project5/button-click-tracker
+      run: docker push gcr.io/realtime-project-453725/button-click-tracker
 
     - name: Deploy to Cloud Run
       run: |
         gcloud run deploy button-click-tracker \
-          --image gcr.io/realtime-project5/button-click-tracker \
+          --image gcr.io/realtime-project-453725/button-click-tracker \
           --platform managed \
           --region us-central1 \
           --allow-unauthenticated \
-          --set-env-vars FIREBASE_CONFIG='{"projectId":"realtime-project5","databaseURL":"https://realtime-project5.firebaseio.com"}'
+          --set-env-vars FIREBASE_CONFIG='{"projectId":"realtime-project-453725","databaseURL":"https://realtime-project-453725.firebaseio.com"}'
